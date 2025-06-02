@@ -8,6 +8,9 @@ public class Epic extends Task {
     }
 
     public void addSubtaskId(int id) {
+        if (id == this.getId()) {
+            return; // игнорируем попытку добавить себя как подзадачу
+        }
         subtaskIds.add(id);
     }
 
