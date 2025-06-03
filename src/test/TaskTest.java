@@ -1,3 +1,7 @@
+package test;
+
+import main.Task;
+import main.TaskStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +21,7 @@ class TaskTest {
         task1.setId(1);
         task1.setStatus(TaskStatus.NEW);
 
-        task2 = new Task("Вторая задача", "торое описание");
+        task2 = new Task("Вторая задача", "второе описание");
         task2.setId(1);
         task2.setStatus(TaskStatus.DONE);
 
