@@ -1,18 +1,16 @@
-package main;
-
 public class Main {
     public static void main(String[] args) {
-        main.TaskManager manager = main.Managers.getDefault();
+        TaskManager manager = Managers.getDefault();
 
         // Создаём задачи
-        main.Task task1 = new main.Task("Купить продукты", "Молоко и хлеб");
-        main.Epic epic1 = new main.Epic("Ремонт квартиры", "Покраска стен");
+        Task task1 = new Task("Купить продукты", "Молоко и хлеб");
+        Epic epic1 = new Epic("Ремонт квартиры", "Покраска стен");
 
         manager.createTask(task1);
         manager.createEpic(epic1);
 
-        main.Subtask subtask1 = new main.Subtask("Купить краску", "Белая матовая", epic1.getId());
-        main.Subtask subtask2 = new main.Subtask("Покрасить стены", "Все комнаты", epic1.getId());
+        Subtask subtask1 = new Subtask("Купить краску", "Белая матовая", epic1.getId());
+        Subtask subtask2 = new Subtask("Покрасить стены", "Все комнаты", epic1.getId());
 
         manager.createSubtask(subtask1);
         manager.createSubtask(subtask2);
@@ -32,9 +30,9 @@ public class Main {
         manager.printAllTasks(); // история должна содержать последние 10 просмотренных
 
         // Обновляем задачу
-        main.Task updatedTask = new main.Task("Купить овощи", "Картошка и лук");
+        Task updatedTask = new Task("Купить овощи", "Картошка и лук");
         updatedTask.setId(1);
-        updatedTask.setStatus(main.TaskStatus.DONE);
+        updatedTask.setStatus(TaskStatus.DONE);
         manager.updateTask(updatedTask);
 
         System.out.println("=== После обновления задачи ===");
@@ -45,5 +43,5 @@ public class Main {
 
         System.out.println("=== После удаления подзадачи ===");
         manager.printAllTasks();
-    }
-}
+            }
+        }

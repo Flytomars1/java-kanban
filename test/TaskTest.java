@@ -1,7 +1,3 @@
-package test;
-
-import main.Task;
-import main.TaskStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

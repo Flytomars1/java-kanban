@@ -1,5 +1,3 @@
-package main;
-
 import java.util.Objects;
 
 public class Task {
@@ -63,7 +61,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return "main.Task{" +
+        return "Task{" +
                 "title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", id=" + id +

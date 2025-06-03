@@ -1,5 +1,3 @@
-package main;
-
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -159,13 +157,13 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         /*
-        main.TaskStatus newStatus;
+        TaskStatus newStatus;
         if (tasksDone) {
-            newStatus = main.TaskStatus.DONE;
+            newStatus = TaskStatus.DONE;
         } else if (tasksInProgress) {
-            newStatus = main.TaskStatus.IN_PROGRESS;
+            newStatus = TaskStatus.IN_PROGRESS;
         } else {
-            newStatus = main.TaskStatus.NEW;
+            newStatus = TaskStatus.NEW;
         }
         System.out.println("Новый статус эпика: " + newStatus);
         */
@@ -284,11 +282,12 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         System.out.println("История:");
-        //List<main.Task> history = getHistory();
+        //List<Task> history = getHistory();
         for (Task task : getHistory()) {
             System.out.println(task);
         }
 
         System.out.println("------------------------------------");
+
     }
 }
