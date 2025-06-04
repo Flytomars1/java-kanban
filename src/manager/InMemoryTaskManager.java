@@ -1,3 +1,10 @@
+package manager;
+
+import model.Epic;
+import model.Subtask;
+import model.Task;
+import model.TaskStatus;
+
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -123,10 +130,8 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public void updateEpicStatus(Epic epic) {
+    private void updateEpicStatus(Epic epic) {
         ArrayList<Integer> subtaskIds = epic.getSubtaskIds();
-        //System.out.println("Обновляем статус эпика: " + epic.getTitle());
-        //System.out.println("Список подзадач: " + subtaskIds);
 
         if (subtaskIds.isEmpty()) {
             epic.setStatus(TaskStatus.NEW);
@@ -156,17 +161,6 @@ public class InMemoryTaskManager implements TaskManager {
             epic.setStatus(TaskStatus.NEW);
         }
 
-        /*
-        TaskStatus newStatus;
-        if (tasksDone) {
-            newStatus = TaskStatus.DONE;
-        } else if (tasksInProgress) {
-            newStatus = TaskStatus.IN_PROGRESS;
-        } else {
-            newStatus = TaskStatus.NEW;
-        }
-        System.out.println("Новый статус эпика: " + newStatus);
-        */
         updateEpic(epic);
     }
 
@@ -282,7 +276,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         System.out.println("История:");
-        //List<Task> history = getHistory();
+        //List<model.Task> history = getHistory();
         for (Task task : getHistory()) {
             System.out.println(task);
         }
