@@ -7,7 +7,7 @@ public class Node {
     Node prev;
     Node next;
 
-    Node (Task task) {
+    Node(Task task) {
         this.task = task;
     }
 
