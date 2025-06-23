@@ -37,17 +37,76 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    void historyStoresOnlyLast10Tasks() {
-        for (int i = 1; i <= 12; i++) {
-            Task task = new Task("Задача " + i, "Описание");
-            task.setId(i);
-            historyManager.add(task);
-        }
+    void duplicatesRemovedAndGetLatestWhenCall() {
+        Task task1 = new Task("Задача 1", "Описание 1");
+        task1.setId(1);
+        Task task2 = new Task("Задача 2", " Описание 2");
+        task2.setId(2);
+
+        historyManager.add(task1);
+        historyManager.add(task2);
+        historyManager.add(task1);
 
         List<Task> history = historyManager.getHistory();
 
-        assertEquals(10, history.size(), "В истории должно быть только 10 последних задач");
-        assertEquals(3, history.get(0).getId(), "Самая старая задача была удалена из истории");
-        assertEquals(12, history.get(history.size() - 1).getId(), "Самая новая задача должна быть в конце");
+        assertEquals(2, history.size(), "в истории 2 задачи");
+        assertEquals(task2, history.get(0), "первая в истории - вторая задача, потому что первая автоматически удалилась");
+        assertEquals(task1, history.get(1), "последняя в итосрии - первая вызванная повторно");
+    }
+
+    @Test
+    void removingTaskFromHistory() {
+        Task task1 = new Task("Задача 1", "Описание 1");
+        task1.setId(1);
+
+        Task task2 = new Task("Задача 2", "Описание 2");
+        task2.setId(2);
+
+        historyManager.add(task1);
+        historyManager.add(task2);
+        historyManager.remove(2);
+
+        List<Task> history = historyManager.getHistory();
+
+        assertEquals(1, history.size(), "В истории должна быть только одна задача");
+        assertEquals(task1, history.get(0), "В истории должна остаться только задача 1");
+    }
+
+    @Test
+    void multipleCallsMaintainOrderOfLastViewed() {
+        Task task1 = new Task("Задача 1", "Описание 1");
+        task1.setId(1);
+
+        Task task2 = new Task("Задача 2", "Описание 2");
+        task2.setId(2);
+
+        Task task3 = new Task("Задача 3", "Описание 3");
+        task3.setId(3);
+
+        historyManager.add(task1);
+        historyManager.add(task2);
+        historyManager.add(task3);
+        historyManager.add(task2);
+        historyManager.add(task1);
+
+        List<Task> history = historyManager.getHistory();
+
+        assertEquals(3, history.size(), "В истории должно быть 3 задачи");
+
+        assertEquals(task3, history.get(0), "Первая задача должна быть task3");
+        assertEquals(task2, history.get(1), "Вторая задача должна быть task2");
+        assertEquals(task1, history.get(2), "Третья задача должна быть task1");
+    }
+
+    @Test
+    void changesToOriginalTaskShouldNotAffectHistory() {
+        Task task = new Task("Оригинальное имя", "Описание");
+        task.setId(1);
+
+        historyManager.add(task);
+        task.setTitle("Изменённое имя");
+        List<Task> history = historyManager.getHistory();
+
+        assertEquals("Оригинальное имя", history.get(0).getTitle(), "Имя в истории не должно измениться после изменения оригинала");
     }
 }
