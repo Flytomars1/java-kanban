@@ -145,4 +145,24 @@ class InMemoryTaskManagerTest {
         assertNull(retrievedTask, "После удаления задача не должна быть доступна");
     }
 
+    @Test
+    void subtaskIdIsRemovedFromEpicAfterDeletion() {
+        Epic epic = new Epic("Эпик", "Описание");
+        epic = manager.createEpic(epic);
+
+        Subtask subtask = new Subtask("Подзадача", "Описание", epic.getId());
+        subtask = manager.createSubtask(subtask);
+
+        int subtaskId = subtask.getId();
+        int epicId = epic.getId();
+
+        Epic storedEpic = manager.getEpicById(epicId);
+        assertTrue(storedEpic.getSubtaskIds().contains(subtaskId), "ID подзадачи должен быть в эпике");
+
+        manager.deleteSubtaskById(subtaskId);
+
+        storedEpic = manager.getEpicById(epicId);
+        assertFalse(storedEpic.getSubtaskIds().contains(subtaskId), "ID подзадачи не должно быть в эпике после удаления");
+    }
+
 }
