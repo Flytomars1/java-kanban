@@ -42,7 +42,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Subtask createSubtask(Subtask subtask) {
-        Epic epic = getEpicById(subtask.getEpicId());
+        Epic epic = epics.get(subtask.getEpicId());
 
         if (epic == null) {
             return null;
@@ -174,21 +174,38 @@ public class InMemoryTaskManager implements TaskManager {
             epic.setStatus(TaskStatus.NEW);
         }
         epics.clear();
+
+        historyManager.deleteAll();
     }
 
     @Override
     public void deleteAllTasks() {
+        for (int id : tasks.keySet()) {
+            historyManager.remove(id);
+        }
         tasks.clear();
     }
 
     @Override
     public void deleteAllEpics() {
+        for (int id : epics.keySet()) {
+            historyManager.remove(id);
+        }
+
+        for (int id : subtasks.keySet()) {
+            historyManager.remove(id);
+        }
+
         subtasks.clear();
         epics.clear();
     }
 
     @Override
     public void deleteAllSubtasks() {
+        for (int id : subtasks.keySet()) {
+            historyManager.remove(id);
+        }
+
         for (Epic epic : epics.values()) {
             epic.clearSubtaskIds();
             updateEpicStatus(epic);
@@ -217,6 +234,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteTaskById(int id) {
         Task task = tasks.remove(id);
         if (task != null) {
+            historyManager.remove(id);
             System.out.println("Задача с id " + id + " удалена");
         } else {
             System.out.println("Задача с id " + id + " не найдена");
@@ -233,7 +251,10 @@ public class InMemoryTaskManager implements TaskManager {
 
         for (int subtaskId : epic.getSubtaskIds()) {
             subtasks.remove(subtaskId);
+            historyManager.remove(subtaskId);
         }
+
+        historyManager.remove(id);
 
         System.out.println("Эпик с id " + id + " и все его подзадачи удалены");
     }
@@ -246,12 +267,14 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
 
-        Epic epic = getEpicById(subtask.getEpicId());
+        int epicId = subtask.getEpicId();
+        Epic epic = epics.get(epicId);
         if (epic != null) {
             epic.removeSubtaskId(id);
             updateEpicStatus(epic);
         }
 
+        historyManager.remove(id);
         System.out.println("Подзадача с id " + id + " удалена");
     }
 
