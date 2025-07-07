@@ -17,6 +17,22 @@ public class InMemoryTaskManager implements TaskManager {
     private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
     private final HistoryManager historyManager = new InMemoryHistoryManager();
 
+    public HashMap<Integer, Task> getTasks() {
+        return tasks;
+    }
+
+    public HashMap<Integer, Epic> getEpics() {
+        return epics;
+    }
+
+    public HashMap<Integer, Subtask> getSubtasks() {
+        return subtasks;
+    }
+
+    @Override
+    public void save() {
+    }
+
     // генератор id
     @Override
     public int generateId() {
@@ -130,7 +146,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    private void updateEpicStatus(Epic epic) {
+    protected void updateEpicStatus(Epic epic) {
         ArrayList<Integer> subtaskIds = epic.getSubtaskIds();
 
         if (subtaskIds.isEmpty()) {
