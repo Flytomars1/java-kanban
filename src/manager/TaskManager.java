@@ -45,8 +45,6 @@ public interface TaskManager {
 
     void printAllTasks();
 
-    void save();
-
     List<Task> getHistory();
 
     //оставить
