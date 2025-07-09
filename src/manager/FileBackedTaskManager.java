@@ -3,8 +3,6 @@ package manager;
 import model.Epic;
 import model.Subtask;
 import model.Task;
-import model.TaskStatus;
-import model.TaskType;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -103,7 +101,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
     }
 
-    @Override
     public void save() {
         try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
@@ -111,17 +108,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             writer.newLine();
 
             for (Task task : getTasks().values()) {
-                writer.write(taskToString(task));
+                writer.write(CsvParser.taskToString(task));
                 writer.newLine();
             }
 
             for (Epic epic : getEpics().values()) {
-                writer.write(epicToString(epic));
+                writer.write(CsvParser.epicToString(epic));
                 writer.newLine();
             }
 
             for (Subtask subtask : getSubtasks().values()) {
-                writer.write(subtaskToString(subtask));
+                writer.write(CsvParser.subtaskToString(subtask));
                 writer.newLine();
             }
         } catch (IOException e) {
@@ -138,56 +135,25 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             reader.readLine();
 
             //читаем файл
-            while (reader.ready()) {
-                String line = reader.readLine();
-                parseLine(saveManager, line);
+            String line = reader.readLine();
+            while (line != null) {
+                Task task = CsvParser.parseLine(line);
+
+                if (task instanceof Epic epic) {
+                    saveManager.createEpic(epic);
+                } else if (task instanceof Subtask subtask) {
+                    saveManager.createSubtask(subtask);
+                    Epic storedEpic = saveManager.getEpics().get(subtask.getEpicId());
+                    saveManager.updateEpicStatus(storedEpic);
+                } else {
+                    saveManager.createTask(task);
+                }
+                line = reader.readLine();
             }
             } catch (IOException e) {
             throw new ManagerSaveException("Ошибка чтения из файла: " + e.getMessage());
         }
         return saveManager;
-    }
-
-    private static void parseLine(FileBackedTaskManager manager, String line) {
-        String[] parts = line.split(",");
-
-        int id = Integer.parseInt(parts[0]);
-        String type = parts[1];
-        String title = parts[2];
-        TaskStatus status = TaskStatus.valueOf(parts[3]); // украл
-        String description = parts[4];
-        //int epicId = Integer.parseInt(parts[5]);
-
-        switch (type) {
-            case "TASK":
-                Task task = new Task(title, description);
-                task.setId(id);
-                task.setStatus(status);
-                manager.getTasks().put(id, task);
-                break;
-
-            case "EPIC":
-                Epic epic = new Epic(title, description);
-                epic.setId(id);
-                epic.setStatus(status);
-                manager.getEpics().put(id, epic);
-                break;
-
-            case "SUBTASK":
-                int epicId = Integer.parseInt(parts[5]);
-                Subtask subtask = new Subtask(title, description, epicId);
-                subtask.setId(id);
-                subtask.setStatus(status);
-                manager.getSubtasks().put(id, subtask);
-
-                //двусторонняя связь
-                Epic storedEpic = manager.getEpics().get(epicId);
-                storedEpic.addSubtaskId(id);
-                manager.updateEpicStatus(storedEpic);
-
-                break;
-        }
-
     }
 
     public static void printFileContent(File file) {
@@ -203,31 +169,4 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             System.out.println("Ошибка чтения файла: " + e.getMessage());
         }
     }
-
-    //не буду менять toString, вдруг пригодится еще
-    private String taskToString(Task task) {
-        return task.getId() + ","
-                + TaskType.TASK + ","
-                + task.getTitle() + ","
-                + task.getStatus() + ","
-                + task.getDescription();
-    }
-
-    private String epicToString(Epic epic) {
-        return epic.getId() + ","
-                + TaskType.EPIC + ","
-                + epic.getTitle() + ","
-                + epic.getStatus() + ","
-                + epic.getDescription();
-    }
-
-    private String subtaskToString(Subtask subtask) {
-        return subtask.getId() + ","
-                + TaskType.SUBTASK + ","
-                + subtask.getTitle() + ","
-                + subtask.getStatus() + ","
-                + subtask.getDescription() + ","
-                + subtask.getEpicId();
-    }
-
 }
