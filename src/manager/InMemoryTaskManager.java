@@ -12,10 +12,22 @@ import java.util.List;
 public class InMemoryTaskManager implements TaskManager {
     private int idCounter = 1;
 
-    private final HashMap<Integer, Task> tasks = new HashMap<>();
-    private final HashMap<Integer, Epic> epics = new HashMap<>();
-    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    protected final HashMap<Integer, Task> tasks = new HashMap<>();
+    protected final HashMap<Integer, Epic> epics = new HashMap<>();
+    protected final HashMap<Integer, Subtask> subtasks = new HashMap<>();
     private final HistoryManager historyManager = new InMemoryHistoryManager();
+
+    public HashMap<Integer, Task> getTasks() {
+        return new HashMap<>(tasks);
+    }
+
+    public HashMap<Integer, Epic> getEpics() {
+        return new HashMap<>(epics);
+    }
+
+    public HashMap<Integer, Subtask> getSubtasks() {
+        return new HashMap<>(subtasks);
+    }
 
     // генератор id
     @Override
@@ -130,7 +142,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    private void updateEpicStatus(Epic epic) {
+    protected void updateEpicStatus(Epic epic) {
         ArrayList<Integer> subtaskIds = epic.getSubtaskIds();
 
         if (subtaskIds.isEmpty()) {
