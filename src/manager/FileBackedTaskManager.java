@@ -107,11 +107,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             writer.write("id,type,name,status,description,startTime,duration,epicId");
             writer.newLine();
 
-            getTasks().values().forEach(task -> {writeTask(writer, task);});
+            getTasks().values().forEach(task -> writeTask(writer, task));
 
-            getEpics().values().forEach(epic -> {writeTask(writer, epic);});
+            getEpics().values().forEach(epic -> writeTask(writer, epic));
 
-            getSubtasks().values().forEach(subtask -> {writeTask(writer, subtask);});
+            getSubtasks().values().forEach(subtask -> writeTask(writer, subtask));
 
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка сохранения данных в файл: " + e.getMessage(), e);
