@@ -6,6 +6,8 @@ import model.Subtask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,9 +20,9 @@ class InMemoryTaskManagerHistoryTest {
     void setUp() {
         taskManager = new InMemoryTaskManager();
 
-        task = new Task("Задача", "Описание");
+        task = new Task("Задача", "Описание", LocalDateTime.of(2025, 4, 5, 10, 0), Duration.ofMinutes(30));
         Epic epic = new Epic("Эпик", "Описание");
-        Subtask subtask = new Subtask("Подзадача", "Описание", 1);
+        Subtask subtask = new Subtask("Подзадача", "Описание", LocalDateTime.of(2025, 4, 5, 10, 0), Duration.ofMinutes(30), 1);
     }
 
     @Test
@@ -48,7 +50,7 @@ class InMemoryTaskManagerHistoryTest {
         Epic epic = new Epic("Эпик", "Описание");
         epic = taskManager.createEpic(epic);
 
-        Subtask subtask = new Subtask("Подзадача", "Описание", epic.getId());
+        Subtask subtask = new Subtask("Подзадача", "Описание", LocalDateTime.of(2025, 4, 5, 10, 0), Duration.ofMinutes(30), epic.getId());
         subtask = taskManager.createSubtask(subtask);
         int subtaskId = subtask.getId();
 
@@ -73,11 +75,11 @@ class InMemoryTaskManagerHistoryTest {
         taskManager.createEpic(epic);
         int epicId = epic.getId();
 
-        Subtask subtask1 = new Subtask("Подзадача 1", "Описание 1", epicId);
+        Subtask subtask1 = new Subtask("Подзадача 1", "Описание 1", LocalDateTime.of(2025, 4, 5, 10, 0), Duration.ofMinutes(30), epicId);
         taskManager.createSubtask(subtask1);
         int s1Id = subtask1.getId();
 
-        Subtask subtask2 = new Subtask("Подзадача 2", "Описание 2", epicId);
+        Subtask subtask2 = new Subtask("Подзадача 2", "Описание 2", LocalDateTime.of(2025, 4, 5, 20, 0), Duration.ofMinutes(30), epicId);
         taskManager.createSubtask(subtask2);
         int s2Id = subtask2.getId();
 
@@ -101,11 +103,11 @@ class InMemoryTaskManagerHistoryTest {
         taskManager.createEpic(epic);
         int epicId = epic.getId();
 
-        Task task = new Task("Задача", "Описание");
+        Task task = new Task("Задача", "Описание", LocalDateTime.of(2025, 4, 5, 10, 0), Duration.ofMinutes(30));
         taskManager.createTask(task);
         int taskId = task.getId();
 
-        Subtask subtask = new Subtask("Подзадача", "Описание", epicId);
+        Subtask subtask = new Subtask("Подзадача", "Описание", LocalDateTime.of(2025, 4, 5, 20, 0), Duration.ofMinutes(30),  epicId);
         taskManager.createSubtask(subtask);
         int subtaskId = subtask.getId();
 
