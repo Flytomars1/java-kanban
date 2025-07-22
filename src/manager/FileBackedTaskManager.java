@@ -104,25 +104,34 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public void save() {
         try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
-            writer.write("id,type,name,status,description,epic");
+            writer.write("id,type,name,status,description,startTime,duration,epicId");
             writer.newLine();
 
-            for (Task task : getTasks().values()) {
-                writer.write(CsvParser.taskToString(task));
-                writer.newLine();
-            }
+            getTasks().values().forEach(task -> {writeTask(writer, task);});
 
-            for (Epic epic : getEpics().values()) {
-                writer.write(CsvParser.epicToString(epic));
-                writer.newLine();
-            }
+            getEpics().values().forEach(epic -> {writeTask(writer, epic);});
 
-            for (Subtask subtask : getSubtasks().values()) {
-                writer.write(CsvParser.subtaskToString(subtask));
-                writer.newLine();
-            }
+            getSubtasks().values().forEach(subtask -> {writeTask(writer, subtask);});
+
         } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка сохранения данных в файл: " + e.getMessage());
+            throw new ManagerSaveException("Ошибка сохранения данных в файл: " + e.getMessage(), e);
+        }
+    }
+
+    private void writeTask(BufferedWriter writer, Task task) {
+        try {
+            String line;
+            if (task instanceof Subtask subtask) {
+                line = CsvParser.subtaskToString(subtask);
+            } else if (task instanceof Epic epic) {
+                line = CsvParser.epicToString(epic);
+            } else {
+                line = CsvParser.taskToString(task);
+            }
+            writer.write(line);
+            writer.newLine();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -131,28 +140,41 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
-            //скипаем первую строку (костыль?)
+
             reader.readLine();
 
-            //читаем файл
-            String line = reader.readLine();
-            while (line != null) {
-                Task task = CsvParser.parseLine(line);
+            String line;
+            while ((line = reader.readLine()) != null) {
+                try {
+                    Task task = CsvParser.parseLine(line);
 
-                if (task instanceof Epic epic) {
-                    saveManager.createEpic(epic);
-                } else if (task instanceof Subtask subtask) {
-                    saveManager.createSubtask(subtask);
-                    Epic storedEpic = saveManager.getEpics().get(subtask.getEpicId());
-                    saveManager.updateEpicStatus(storedEpic);
-                } else {
-                    saveManager.createTask(task);
+                    if (task instanceof Epic epic) {
+                        saveManager.loadEpic(epic);
+                    } else if (task instanceof Subtask subtask) {
+                        saveManager.loadSubtask(subtask);
+                    } else {
+                        saveManager.loadTask(task);
+                    }
+                } catch (RuntimeException e) {
+                    throw new ManagerSaveException("Ошибка парсинга строки '" + line + "': " + e.getMessage(), e);
                 }
-                line = reader.readLine();
             }
-            } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка чтения из файла: " + e.getMessage());
+
+            for (Subtask subtask : saveManager.subtasks.values()) {
+                Epic epic = saveManager.epics.get(subtask.getEpicId());
+                if (epic != null) {
+                    epic.addSubtaskId(subtask.getId());
+                }
+            }
+
+            for (Epic epic : saveManager.epics.values()) {
+                saveManager.updateEpicStatus(epic);
+            }
+
+        } catch (IOException e) {
+            throw new ManagerSaveException("Ошибка чтения из файла: " + e.getMessage(), e);
         }
+
         return saveManager;
     }
 
