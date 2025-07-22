@@ -24,9 +24,11 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
 
         //будем хранить в истории не задачу, а копию задачи
-        Task copy = new Task(task.getTitle(), task.getDescription());
+        Task copy = new Task(task.getTitle(), task.getDescription(), task.getStartTime(), task.getDuration());
         copy.setId(task.getId());
         copy.setStatus(task.getStatus());
+        copy.setStartTime(task.getStartTime());
+        copy.setDuration(task.getDuration());
 
         historyList.linkLast(copy);
         historyMap.put(taskId, historyList.getLastNode());
