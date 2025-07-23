@@ -149,11 +149,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     Task task = CsvParser.parseLine(line);
 
                     if (task instanceof Epic epic) {
-                        saveManager.loadEpic(epic);
+                        saveManager.epics.put(epic.getId(), epic);
                     } else if (task instanceof Subtask subtask) {
-                        saveManager.loadSubtask(subtask);
+                        saveManager.subtasks.put(subtask.getId(), subtask);
+                        if (subtask.getStartTime() != null) {
+                            saveManager.prioritizedTask.add(subtask);
+                        }
                     } else {
-                        saveManager.loadTask(task);
+                        saveManager.tasks.put(task.getId(), task);
+                        if (task.getStartTime() != null) {
+                            saveManager.prioritizedTask.add(task);
+                        }
                     }
                 } catch (RuntimeException e) {
                     throw new ManagerSaveException("Ошибка парсинга строки '" + line + "': " + e.getMessage(), e);
