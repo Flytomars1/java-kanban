@@ -4,6 +4,8 @@ import model.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,7 +27,7 @@ class InMemoryHistoryManagerTest {
 
     @Test
     void taskIsAddedToHistory() {
-        Task task = new Task("Задача", "Описание");
+        Task task = new Task("Задача", "Описание", LocalDateTime.of(2025, 4, 5, 10, 0), Duration.ofMinutes(30));
         task.setId(1);
 
         historyManager.add(task);
@@ -38,9 +40,9 @@ class InMemoryHistoryManagerTest {
 
     @Test
     void duplicatesRemovedAndGetLatestWhenCall() {
-        Task task1 = new Task("Задача 1", "Описание 1");
+        Task task1 = new Task("Задача 1", "Описание 1", LocalDateTime.of(2025, 4, 5, 10, 0), Duration.ofMinutes(30));
         task1.setId(1);
-        Task task2 = new Task("Задача 2", " Описание 2");
+        Task task2 = new Task("Задача 2", " Описание 2", LocalDateTime.of(2025, 4, 5, 10, 0), Duration.ofMinutes(30));
         task2.setId(2);
 
         historyManager.add(task1);
@@ -56,10 +58,10 @@ class InMemoryHistoryManagerTest {
 
     @Test
     void removingTaskFromHistory() {
-        Task task1 = new Task("Задача 1", "Описание 1");
+        Task task1 = new Task("Задача 1", "Описание 1", LocalDateTime.of(2025, 4, 5, 10, 0), Duration.ofMinutes(30));
         task1.setId(1);
 
-        Task task2 = new Task("Задача 2", "Описание 2");
+        Task task2 = new Task("Задача 2", "Описание 2", LocalDateTime.of(2025, 4, 5, 10, 0), Duration.ofMinutes(30));
         task2.setId(2);
 
         historyManager.add(task1);
@@ -74,13 +76,13 @@ class InMemoryHistoryManagerTest {
 
     @Test
     void multipleCallsMaintainOrderOfLastViewed() {
-        Task task1 = new Task("Задача 1", "Описание 1");
+        Task task1 = new Task("Задача 1", "Описание 1", LocalDateTime.of(2025, 4, 5, 10, 0), Duration.ofMinutes(30));
         task1.setId(1);
 
-        Task task2 = new Task("Задача 2", "Описание 2");
+        Task task2 = new Task("Задача 2", "Описание 2", LocalDateTime.of(2025, 4, 5, 10, 0), Duration.ofMinutes(30));
         task2.setId(2);
 
-        Task task3 = new Task("Задача 3", "Описание 3");
+        Task task3 = new Task("Задача 3", "Описание 3", LocalDateTime.of(2025, 4, 5, 10, 0), Duration.ofMinutes(30));
         task3.setId(3);
 
         historyManager.add(task1);
@@ -100,7 +102,7 @@ class InMemoryHistoryManagerTest {
 
     @Test
     void changesToOriginalTaskShouldNotAffectHistory() {
-        Task task = new Task("Оригинальное имя", "Описание");
+        Task task = new Task("Оригинальное имя", "Описание", LocalDateTime.of(2025, 4, 5, 10, 0), Duration.ofMinutes(30));
         task.setId(1);
 
         historyManager.add(task);

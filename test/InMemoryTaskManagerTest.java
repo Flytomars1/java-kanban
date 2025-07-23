@@ -1,168 +1,76 @@
 import manager.InMemoryTaskManager;
-import manager.TaskManager;
 import model.Epic;
-import model.Subtask;
-import model.Task;
 import model.TaskStatus;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class InMemoryTaskManagerTest {
-    private Task task;
-    private Epic epic;
-    private Subtask subtask;
-    private Subtask subtask1;
-    private TaskManager manager;
-    int idCounter;
+class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
-    @BeforeEach
-    void setUp() {
-        idCounter = 1;
-
-        manager = new InMemoryTaskManager();
-
-        epic = new Epic("Эпик 1", "Описание");
-        manager.createEpic(epic);
-        int epicId = epic.getId();
-
-        task = new Task("Задача", "Описание");
-        task.setId(2);
-
-        subtask = new Subtask("Подзадача 1", "Описание 1", 1);
-        subtask.setId(3);
-
-        subtask1 = new Subtask("Подзадача 2", "Описание 2", 1);
-        subtask1.setId(4);
-    }
-
-    @AfterEach
-    void tearDown() {
-        idCounter = 1;
-        subtask = null;
-        subtask1 = null;
-        task = null;
-        epic = null;
-        manager = null;
+    @Override
+    protected InMemoryTaskManager createManager() {
+        return new InMemoryTaskManager();
     }
 
     @Test
-    void taskCanBeCreatedAndRetrievedById() {
+    void epicStatusShouldBeInProgressWhenAnySubtaskIsInProgress() {
+        Epic savedEpic = manager.createEpic(epic);
+        subtask.setEpicId(savedEpic.getId());
+        subtask2.setEpicId(savedEpic.getId());
 
-        Task createdTask = manager.createTask(task);
-        Task retrievedTask = manager.getTaskById(createdTask.getId());
-
-        assertNotNull(retrievedTask, "Задача не должна быть null");
-        assertEquals(task.getTitle(), retrievedTask.getTitle(), "Названия задач должны совпадать");
-        assertEquals(task.getDescription(), retrievedTask.getDescription(), "Описания задач должны совпадать");
-        assertEquals(createdTask.getId(), retrievedTask.getId(), "ID задач должны совпадать");
-    }
-
-    @Test
-    void epicCanBeCreatedAndRetrievedById() {
-        Epic createdEpic = manager.createEpic(epic);
-        Epic retrievedEpic = manager.getEpicById(createdEpic.getId());
-
-        assertNotNull(retrievedEpic, "Эпик не должен быть null");
-        assertEquals(epic.getTitle(), retrievedEpic.getTitle(), "Названия эпиков должны совпадать");
-        assertEquals(epic.getDescription(), retrievedEpic.getDescription(), "Описания эпиков должны совпадать");
-        assertEquals(epic.getId(), retrievedEpic.getId(), "ID эпиков должны совпадать");
-    }
-
-    @Test
-    void subtaskCanBeCreatedAndRetrievedById() {
         manager.createSubtask(subtask);
+        manager.createSubtask(subtask2);
 
-        Subtask retrievedSubtask = manager.getSubtaskById(subtask.getId());
+        // Меняем одну подзадачу на IN_PROGRESS
+        subtask.setStatus(TaskStatus.IN_PROGRESS);
+        manager.updateSubtask(subtask);
 
-        assertNotNull(retrievedSubtask, "Подзадача должна существовать после создания");
-        assertEquals(subtask.getId(), retrievedSubtask.getId(), "ID должен совпадать");
-        assertEquals(subtask.getTitle(), retrievedSubtask.getTitle(), "Название должно совпадать");
-        assertEquals(subtask.getDescription(), retrievedSubtask.getDescription(), "Описание должно совпадать");
-        assertEquals(subtask.getEpicId(), retrievedSubtask.getEpicId(), "epicId должен совпадать");
+        Epic updatedEpic = manager.getEpicById(savedEpic.getId());
+        assertEquals(TaskStatus.IN_PROGRESS, updatedEpic.getStatus(),
+                "Если хотя бы одна подзадача IN_PROGRESS, статус эпика должен быть IN_PROGRESS");
     }
 
     @Test
-    void subtaskAddsToEpicAndUpdatesStatus() {
-        manager.createSubtask(subtask);
+    void epicCalculateStartTimeDurationAndEndTime() {
+        manager.createSubtask(subtask);  // [11:00 - 11:45]
+        manager.createSubtask(subtask2); // [12:00 - 13:00]
 
         Epic storedEpic = manager.getEpicById(epic.getId());
 
-        assertNotNull(storedEpic, "Эпик должен существовать");
-        assertTrue(storedEpic.getSubtaskIds().contains(subtask.getId()),
-                "Эпик должен содержать ID этой подзадачи");
+        assertNotNull(storedEpic.getStartTime(), "startTime эпика не должен быть null");
+        assertEquals(LocalDateTime.of(2025, 4, 5, 11, 0), storedEpic.getStartTime(),
+                "startTime эпика должен быть самым ранним");
 
-        // создать свою копию подзадачи, чтобы обратится к правильному id
-        Subtask storedSubtask = manager.getSubtaskById(subtask.getId());
-        storedSubtask.setStatus(TaskStatus.DONE);
-        manager.updateSubtask(storedSubtask);
+        assertEquals(Duration.ofMinutes(105), storedEpic.getDuration(),
+                "duration эпика должен быть суммой длительностей подзадач");
 
-        storedEpic = manager.getEpicById(epic.getId());
-
-        assertEquals(TaskStatus.DONE, storedEpic.getStatus(),
-                "Статус эпика должен стать DONE, если подзадача DONE");
+        assertEquals(LocalDateTime.of(2025, 4, 5, 13, 0), storedEpic.getEndTime(),
+                "endTime эпика должен быть временем окончания самой поздней подзадачи");
     }
 
     @Test
-    void epicStatusIsNewIfNoSubtasks() {
-        Epic createdEpic = manager.createEpic(epic);
-        Epic retrievedEpic = manager.getEpicById(createdEpic.getId());
+    void epicStatusShouldBeNewAfterAllSubtasksAreDeleted() {
+        Epic savedEpic = manager.createEpic(epic);
+        subtask.setEpicId(savedEpic.getId());
+        manager.createSubtask(subtask);
 
-        assertEquals(TaskStatus.NEW, retrievedEpic.getStatus(),
-                "Эпик без подзадач должен иметь статус NEW");
-    }
+        assertEquals(TaskStatus.NEW, manager.getEpicById(savedEpic.getId()).getStatus());
 
-    @Test
-    void taskUpdateChangesOnlyTargetedFields() {
-        manager.createTask(task);
-        Task updatedTask = new Task("Обновлённая задача", "Новое описание");
-        updatedTask.setId(task.getId());
-        updatedTask.setStatus(TaskStatus.DONE);
+        subtask.setStatus(TaskStatus.DONE);
+        manager.updateSubtask(subtask);
 
-        manager.updateTask(updatedTask);
+        assertEquals(TaskStatus.DONE, manager.getEpicById(savedEpic.getId()).getStatus());
 
-        Task storedTask = manager.getTaskById(task.getId());
+        manager.deleteAllSubtasks();
 
-        assertNotNull(storedTask, "Задача не найдена");
-        assertEquals("Обновлённая задача", storedTask.getTitle(), "Заголовок должен быть изменён");
-        assertEquals("Новое описание", storedTask.getDescription(), "Описание должно быть изменено");
-        assertEquals(TaskStatus.DONE, storedTask.getStatus(), "Статус должен быть изменён");
-
-        assertEquals(task.getId(), storedTask.getId(), "ID задачи не должен меняться при обновлении");
-    }
-
-    @Test
-    void taskIsNotRetrievableAfterDeletion() {
-        Task createdTask = manager.createTask(task);
-        int taskId = createdTask.getId();
-
-        manager.deleteTaskById(taskId);
-
-        Task retrievedTask = manager.getTaskById(taskId);
-
-        assertNull(retrievedTask, "После удаления задача не должна быть доступна");
-    }
-
-    @Test
-    void subtaskIdIsRemovedFromEpicAfterDeletion() {
-        Epic epic = new Epic("Эпик", "Описание");
-        epic = manager.createEpic(epic);
-
-        Subtask subtask = new Subtask("Подзадача", "Описание", epic.getId());
-        subtask = manager.createSubtask(subtask);
-
-        int subtaskId = subtask.getId();
-        int epicId = epic.getId();
-
-        Epic storedEpic = manager.getEpicById(epicId);
-        assertTrue(storedEpic.getSubtaskIds().contains(subtaskId), "ID подзадачи должен быть в эпике");
-
-        manager.deleteSubtaskById(subtaskId);
-
-        storedEpic = manager.getEpicById(epicId);
-        assertFalse(storedEpic.getSubtaskIds().contains(subtaskId), "ID подзадачи не должно быть в эпике после удаления");
+        Epic updatedEpic = manager.getEpicById(savedEpic.getId());
+        assertNotNull(updatedEpic, "Эпик не должен быть удалён");
+        assertTrue(updatedEpic.getSubtaskIds().isEmpty(), "Список подзадач должен быть пуст");
+        assertEquals(TaskStatus.NEW, updatedEpic.getStatus(),
+                "После удаления всех подзадач статус эпика должен стать NEW");
     }
 
 }

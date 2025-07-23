@@ -3,7 +3,6 @@ import model.Task;
 import model.Epic;
 import model.Subtask;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public interface TaskManager {
@@ -47,8 +46,5 @@ public interface TaskManager {
 
     List<Task> getHistory();
 
-    //оставить
-    ArrayList<Task> getAllTasks();
-
-    ArrayList<Subtask> getSubtasksByEpicId(int epidId);
+    List<Task> getPrioritizedTasks();
 }
