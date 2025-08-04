@@ -9,6 +9,11 @@ public class Epic extends Task {
     private final ArrayList<Integer> subtaskIds = new ArrayList<>();
     private LocalDateTime endTime;
 
+    //конструктор по умолчанию, чтобы гсон нормально создал массив
+    public Epic() {
+        super("", "", null, null);
+    }
+
     public Epic(String title, String description) {
         super(title, description, null, null);
     }
@@ -29,7 +34,7 @@ public class Epic extends Task {
     }
 
     public ArrayList<Integer> getSubtaskIds() {
-        return subtaskIds;
+        return new ArrayList<>(subtaskIds);
     }
 
     public LocalDateTime calculateStartTime(List<Subtask> allSubtasks) {
