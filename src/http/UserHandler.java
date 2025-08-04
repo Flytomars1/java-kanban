@@ -49,7 +49,7 @@ public abstract class UserHandler extends BaseHttpHandler implements HttpHandler
     }
 
     protected int extractIdFromPath(String path, String taskType) {
-        if (path == null || !path.startsWith(taskType +"/")) {
+        if (path == null || !path.startsWith(taskType + "/")) {
             return -1;
         }
 
@@ -66,6 +66,8 @@ public abstract class UserHandler extends BaseHttpHandler implements HttpHandler
     }
 
     protected abstract void handleGet(HttpExchange exchange) throws IOException;
+
     protected abstract void handlePost(HttpExchange exchange) throws IOException;
+
     protected abstract void handleDelete(HttpExchange exchange) throws IOException;
 }
