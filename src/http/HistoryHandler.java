@@ -8,7 +8,7 @@ import manager.TaskManager;
 import java.io.IOException;
 import java.util.List;
 
-public class HistoryHandler extends UserHandler implements HttpHandler {
+public class HistoryHandler extends UserHandler {
     public HistoryHandler(TaskManager taskManager, Gson gson) {
         super(taskManager, gson);
     }

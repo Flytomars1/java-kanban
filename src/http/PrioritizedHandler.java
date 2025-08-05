@@ -9,7 +9,7 @@ import model.Task;
 import java.io.IOException;
 import java.util.List;
 
-public class PrioritizedHandler extends UserHandler implements HttpHandler {
+public class PrioritizedHandler extends UserHandler {
     public PrioritizedHandler(TaskManager taskManager, Gson gson) {
         super(taskManager, gson);
     }

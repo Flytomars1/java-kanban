@@ -27,11 +27,5 @@ public class BaseEndpointTest {
     @AfterEach
     void tearDown() {
         server.stop();
-        //даем остановиться, не получается по другому
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 }

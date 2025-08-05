@@ -1,7 +1,6 @@
 package http;
 
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import com.google.gson.Gson;
 import manager.NotFoundException;
 import manager.TaskManager;
@@ -15,7 +14,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class EpicHandler extends UserHandler implements HttpHandler {
+public class EpicHandler extends UserHandler {
     public EpicHandler(TaskManager taskManager, Gson gson) {
         super(taskManager, gson);
     }
