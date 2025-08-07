@@ -3,6 +3,7 @@ import model.Task;
 import model.Epic;
 import model.Subtask;
 
+import java.util.HashMap;
 import java.util.List;
 
 public interface TaskManager {
@@ -36,15 +37,23 @@ public interface TaskManager {
 
     void deleteAllSubtasksByEpicId(int epicId);
 
-    void deleteTaskById(int id);
+    boolean deleteTaskById(int id);
 
-    void deleteEpicById(int id);
+    boolean deleteEpicById(int id);
 
-    void deleteSubtaskById(int id);
+    boolean deleteSubtaskById(int id);
 
     void printAllTasks();
 
     List<Task> getHistory();
 
     List<Task> getPrioritizedTasks();
+
+    boolean hasIntersection(Task newTask);
+
+    HashMap<Integer, Task> getTasks();
+
+    HashMap<Integer, Epic> getEpics();
+
+    HashMap<Integer, Subtask> getSubtasks();
 }

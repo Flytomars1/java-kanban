@@ -253,19 +253,21 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void deleteTaskById(int id) {
+    public boolean deleteTaskById(int id) {
         Task task = tasks.remove(id);
         if (task != null) {
             removeTaskFromPrioritized(task);
             historyManager.remove(id);
+            return true;
         }
+        return false;
     }
 
     @Override
-    public void deleteEpicById(int id) {
+    public boolean deleteEpicById(int id) {
         Epic epic = epics.remove(id);
         if (epic == null) {
-            return;
+            return false;
         }
 
         for (int subtaskId : epic.getSubtaskIds()) {
@@ -274,13 +276,14 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         historyManager.remove(id);
+        return true;
     }
 
     @Override
-    public void deleteSubtaskById(int id) {
+    public boolean deleteSubtaskById(int id) {
         Subtask subtask = subtasks.remove(id);
         if (subtask == null) {
-            return;
+            return false;
         }
 
         int epicId = subtask.getEpicId();
@@ -292,6 +295,8 @@ public class InMemoryTaskManager implements TaskManager {
 
         removeTaskFromPrioritized(subtask);
         historyManager.remove(id);
+
+        return true;
     }
 
     //методы для управления приоритетами
@@ -325,7 +330,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     //есть пересечения
-    private boolean hasIntersection(Task newTask) {
+    public boolean hasIntersection(Task newTask) {
         if (newTask.getStartTime() == null) {
             return false;
         }
